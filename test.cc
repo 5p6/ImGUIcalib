@@ -3,8 +3,9 @@
 #include <iostream>
 #include <vector>
 
+
 int main()
 {
-    std::unique_ptr<MainWindow> win = std::make_unique<MainWindow>(960,1840);
+    std::unique_ptr<MainWindow> win = std::make_unique<MainWindow>(540,1080);
     return 0;
 }

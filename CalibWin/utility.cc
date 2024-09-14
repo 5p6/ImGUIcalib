@@ -43,6 +43,9 @@ namespace utility
 
     bool concat(const cv::Mat &left, const cv::Mat &right, cv::Mat &dst)
     {
+        cv::Mat rightc;
+        if (left.size() != right.size())
+            cv::resize(right, rightc, left.size());
         try
         {
             cv::hconcat(left, right, dst);
@@ -52,5 +55,6 @@ namespace utility
             std::cerr << "concat images error : " << e.what() << '\n';
             return false;
         }
+        return true;
     }
 }

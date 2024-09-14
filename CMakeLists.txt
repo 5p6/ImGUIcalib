@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-# 工具链
-set(VCPKG_ROOT "F:/app/vcpkg/scripts/buildsystems/vcpkg.cmake")
-set(CMAKE_TOOLCHAIN_FILE ${VCPKG_ROOT})
+
 
 project(test)
 set(CMAKE_CXX_STANDARD 17)
@@ -13,14 +11,15 @@ find_package(OpenGL)
 find_package(glfw3)
 find_package(glm CONFIG REQUIRED)
 find_package(OpenCV REQUIRED)
-# find_package(GLEW REQUIRED)
+find_package(spdlog)
+
 # imgui的源代码
 aux_source_directory(${PROJECT_SOURCE_DIR}/imgui/src IMGUI)
 set(ImGuiSource
     ${IMGUI}
     # imgui file
     ${PROJECT_SOURCE_DIR}/imgui/extension/imguifile/ImGuiFileDialog.cpp
-    ${PROJECT_SOURCE_DIR}/imgui/extension/imguifile/dirent.h
+    # ${PROJECT_SOURCE_DIR}/imgui/extension/imguifile/dirent.h
     # imgui plot
     ${PROJECT_SOURCE_DIR}/imgui/extension/implot/implot_internal.h
     ${PROJECT_SOURCE_DIR}/imgui/extension/implot/implot.h
@@ -40,7 +39,7 @@ include_directories(
 )
 
 # 静态链接库
-add_library(CALIBWIN STATIC
+add_library(CALIBWIN SHARED
     ${ImGuiSource}
     ${PROJECT_SOURCE_DIR}/CalibWin/MainWindow.cc
     ${PROJECT_SOURCE_DIR}/CalibWin/CalibWindow.cc
@@ -53,6 +52,7 @@ target_link_libraries(CALIBWIN PRIVATE
     ${OpenCV_LIBS}
 )
 
+
 # 示例程序
 add_executable(test test.cc)
 target_link_libraries(test
@@ -60,13 +60,4 @@ target_link_libraries(test
     OpenGL::GL
     glfw
     glm::glm
-)
-
-add_executable(childtest childtest.cc)
-target_link_libraries(childtest
-    CALIBWIN
-    OpenGL::GL
-    glfw
-    glm::glm
-    ${OpenCV_LIBS}
 )

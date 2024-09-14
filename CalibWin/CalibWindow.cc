@@ -133,18 +133,24 @@ void CalibWindow::render()
 }
 void CalibWindow::calib()
 {
+    // std::printf("check the data \n");;
     if (this->algo->getrvecs().size() != 0)
     {
+        // std::printf("clear buffer\n");
         this->algo->clear();
         this->reswin_->clear();
     }
+    // std::printf("calib\n");
     if (!this->algo->calib())
         return;
+    // std::printf("data\n");
     TransportData();
+    // std::printf("data end\n");
 }
 void CalibWindow::TransportData()
 {
-    // 棋盘格
+    // std::printf("pose \n");
+    // // 棋盘格
     auto rvecs = algo->getrvecs();
     auto tvecs = algo->gettvecs();
     for (int i = 0; i < rvecs.size(); i++)
@@ -162,6 +168,7 @@ void CalibWindow::TransportData()
                                 t,
                                 r);
     }
+    // std::printf("cam \n");
     // 相机
     // orginal left camera
     reswin_->addCamera(glm::vec3(0.f), glm::vec3(0.f));
@@ -180,16 +187,17 @@ void CalibWindow::TransportData()
                     rvec.at<double>(2, 0) * 180 / 3.1415926);
         this->reswin_->addCamera(t, r);
     }
-    // 标定图像
+    // std::printf("img \n");
+    // // 标定图像
     this->reswin_->addcalibimg(this->algo->getCalibimgs());
-
-    // 重投影误差
-    this->reswin_->addlefterrors(
-        this->algo->getLeftReproerr());
+    // std::printf("error \n");
+    // // 重投影误差
+    std::vector<double> le = this->algo->getLeftReproerr();
+    this->reswin_->addlefterrors(le);
     if (this->algo->getNumType() == CalibWindow::CamNumType::Stereo)
     {
-        this->reswin_->addrighterrors(
-            this->algo->getRightReproerr());
+        std::vector<double> re = this->algo->getRightReproerr();
+        this->reswin_->addrighterrors(re);
     }
 }
 void CalibWindow::write() const
@@ -479,13 +487,18 @@ private:
 };
 bool CalibAlgorithmimpl::calib()
 {
+    // std::printf("record\n");
     record();
+    // std::printf("get files\n");
     if (!getfiles())
         return false;
+    // std::printf("get corners\n");
     if (!getcalibcorner())
         return false;
+    // std::printf("get calib\n");
     if (!calibalgo())
         return false;
+    // std::printf("get errors\n");
     calcerror();
     return true;
 }
@@ -495,16 +508,18 @@ bool CalibAlgorithmimpl::clear()
     // 路径
     left_paths.clear();
     right_paths.clear();
+
     // 点对
     left_points.clear();
     right_points.clear();
     obj_points.clear();
+
     // 误差
     left_reproerr.clear();
     right_reproerror.clear();
+
     // 标定图像
     calib_imgs.clear();
-    // message.clear();
     return true;
 }
 std::vector<std::string> CalibAlgorithmimpl::getFilesFromPath(const std::string &path)
@@ -553,16 +568,21 @@ bool CalibAlgorithmimpl::getcalibcorner()
     cv::Mat left_gray, right_gray;
     // 左标志
     bool left_ret, right_ret;
+    // std::printf("corner detect\n");
     // 右标志
     for (int i = 0; i < left_paths.size(); i++)
     {
+        // std::printf("corner detect index : %d \n",i);
+        // std::printf("left paths : %s \n",left_paths[i].c_str());
         left_img = cv::imread(left_paths[i]);
         cv::cvtColor(left_img, left_gray, cv::COLOR_BGR2GRAY);
         if (numtype == CalibWindow::CamNumType::Stereo)
         {
+            // std::printf("right paths : %s \n",right_paths[i].c_str());
             right_img = cv::imread(right_paths[i]);
             cv::cvtColor(right_img, right_gray, cv::COLOR_BGR2GRAY);
         }
+        // std::printf("find corners \n");
         // 角点查找
         if (boardtype == CalibWindow::BoardType::Square)
         {
@@ -576,6 +596,7 @@ bool CalibAlgorithmimpl::getcalibcorner()
             if (numtype == CalibWindow::CamNumType::Stereo)
                 right_ret = cv::findCirclesGrid(right_gray, board_size, right_corners, cv::CALIB_CB_ADAPTIVE_THRESH);
         }
+        // std::printf("continue check\n");
         if (numtype == CalibWindow::CamNumType::Monocular && !left_ret)
         {
             message << "find corners fault,the path of image : " << left_paths[i] << std::endl;
@@ -595,33 +616,42 @@ bool CalibAlgorithmimpl::getcalibcorner()
         if (boardtype == CalibWindow::BoardType::Square)
         {
             // 亚角点
-            cv::cornerSubPix(left_gray, left_corners, radius_size, cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::Type::EPS + cv::TermCriteria::Type::MAX_ITER, 50, 1e-6));
+            cv::cornerSubPix(left_gray, left_corners, radius_size, cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::Type::EPS + cv::TermCriteria::Type::MAX_ITER, 100, 1e-6));
             if (numtype == CalibWindow::CamNumType::Stereo)
-                cv::cornerSubPix(right_gray, right_corners, radius_size, cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::Type::EPS + cv::TermCriteria::Type::MAX_ITER, 50, 1e-6));
+                cv::cornerSubPix(right_gray, right_corners, radius_size, cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::Type::EPS + cv::TermCriteria::Type::MAX_ITER, 100, 1e-6));
         }
+        // std::printf("draw corners\n");
         cv::drawChessboardCorners(left_img, board_size, left_corners, left_ret);
+        // std::printf("draw left corners\n");
         if (numtype == CalibWindow::CamNumType::Stereo)
         {
+            // std::printf("draw right corners\n");
             cv::drawChessboardCorners(right_img, board_size, right_corners, right_ret);
             // 双目
             cv::Mat dst;
             utility::concat(left_img, right_img, dst);
-            calib_imgs.emplace_back(dst);
+            if(dst.rows > 1024 || dst.cols > 1024)
+            cv::resize(dst,dst,cv::Size(),0.3,0.3);
+            // std::printf("push corners end \n");
+            calib_imgs.push_back(dst);
+            // std::printf("push corners end \n");
         }
         else
         {
             // 单目
-            calib_imgs.emplace_back(left_img);
+            calib_imgs.push_back(left_img);
         }
         // cv::imshow("left", left_img);
         // if (numtype == CalibWindow::CamNumType::Stereo)
         //     cv::imshow("right", right_img);
-        // cv::waitKey(500);
+        // cv::waitKey();
         // 角点推入
+        // std::printf("push corner points\n");
         left_points.push_back(left_corners);
         if (numtype == CalibWindow::CamNumType::Stereo)
             right_points.push_back(right_corners);
     }
+    // std::printf("corner detect end \n");
     cv::destroyAllWindows();
     // 如果没有检测到角点，返回
     if (left_points.empty())
@@ -890,8 +920,8 @@ bool CalibAlgorithmimpl::write() const
              << "Monocular"
              << "K_l" << K_l
              << "D_l" << D_l;
+        break;
     }
-    break;
     case CalibWindow::CamNumType::Stereo:
     {
         file << "Camera_NumType"
@@ -902,6 +932,7 @@ bool CalibAlgorithmimpl::write() const
              << "D_r" << D_r
              << "R" << R
              << "t" << t;
+        break;
     }
     default:
         return false;
@@ -940,11 +971,12 @@ double CalibAlgorithmimpl::computeReprojectionError(const std::vector<cv::Point3
     std::vector<cv::Point2f> projectedPoints;
 
     // 将世界坐标系中的 3D 点投影到图像平面上
-    cv::projectPoints(objectPoints, rvec, tvec, cameraMatrix, distCoeffs, projectedPoints);
-
+    if (sensortype == CalibWindow::CamSenorType::Pinhole)
+        cv::projectPoints(objectPoints, rvec, tvec, cameraMatrix, distCoeffs, projectedPoints);
+    else if (sensortype == CalibWindow::CamSenorType::Fisheye)
+        cv::fisheye::projectPoints(objectPoints, rvec, tvec, cameraMatrix, distCoeffs, projectedPoints);
     double totalError = 0.0;
     int nPoints = objectPoints.size();
-
     // 计算重投影误差 (使用欧几里得距离)
     for (int i = 0; i < nPoints; ++i)
     {

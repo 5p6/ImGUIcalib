@@ -1,12 +1,16 @@
 #ifndef BASEWINDOW_H
 #define BASEWINDOW_H
+
 #ifdef _WIN32
 #ifdef DLLEXPORT
 #define DLLEXPORT __declspec(dllexport)
 #else
 #define DLLEXPORT
 #endif
+#else
+#define DLLEXPORT
 #endif
+
 class DLLEXPORT BaseWindow
 {
 public:
