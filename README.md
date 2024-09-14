@@ -1,5 +1,14 @@
 ### 1.介绍
-基于OpenCV和ImGui的相机标定程序。
+基于OpenCV和ImGui的相机标定程序。目前支持的相机类型有
+* 按照相机数目
+    * 单目
+    * 双目
+* 按照相机传感器类型
+    * 针孔
+    * 语言
+同时，支持的棋盘格类型有
+* 角点
+* 原点（仅仅支持对称圆点）
 
 ### 2.环境依赖
 * OpenCV 4.x
@@ -34,3 +43,14 @@ cmake --build ./build --config release -j
 ```bash
 ./build/test
 ```
+
+
+### 5.结果可视化
+基本的gui界面
+!["gui"](result\gui.png)
+选择文件夹的界面
+!["select"](result\select.png)
+单目标定
+!["monocular"](result\monocular.png)
+双目标定
+!["stereo"](result\stereo.png)
