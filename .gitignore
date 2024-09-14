@@ -1,0 +1,6 @@
+.vscode
+build
+*.ini
+main.cc
+childtest.cc
+calib
