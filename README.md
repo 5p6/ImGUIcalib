@@ -46,11 +46,18 @@ cmake --build ./build --config release -j
 
 
 ### 5.结果可视化
-基本的gui界面
-!["gui"](result\gui.png)
-选择文件夹的界面
-!["select"](result\select.png)
-单目标定
-!["monocular"](result\monocular.png)
-双目标定
-!["stereo"](result\stereo.png)
+<div align="center">
+    <img src="result/gui.png" alt="基本的gui界面">
+</div>
+
+<div align="center">
+    <img src="result/select.png" alt="选择文件夹的界面">
+</div>
+
+<div align="center">
+    <img src="result/monocular.png" alt="单目标定">
+</div>
+
+<div align="center">
+    <img src="result/stereo.png" alt="双目标定">
+</div>
