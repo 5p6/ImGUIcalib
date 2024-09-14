@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 
+# 工具链
+if(WIN32)
+    set(VCPKG_ROOT "F:/app/vcpkg/scripts/buildsystems/vcpkg.cmake")
+    set(CMAKE_TOOLCHAIN_FILE ${VCPKG_ROOT})
+endif()
 
 
 project(test)
@@ -11,7 +16,14 @@ find_package(OpenGL)
 find_package(glfw3)
 find_package(glm CONFIG REQUIRED)
 find_package(OpenCV REQUIRED)
-find_package(spdlog)
+
+# 设置库的类型变量，默认为动态库
+set(MYLIB_TYPE SHARED)
+# 检查操作系统
+if(WIN32)
+    # 对于Windows，设置为静态库
+    set(MYLIB_TYPE STATIC)
+endif()
 
 # imgui的源代码
 aux_source_directory(${PROJECT_SOURCE_DIR}/imgui/src IMGUI)
@@ -39,7 +51,7 @@ include_directories(
 )
 
 # 静态链接库
-add_library(CALIBWIN SHARED
+add_library(CALIBWIN ${MYLIB_TYPE}
     ${ImGuiSource}
     ${PROJECT_SOURCE_DIR}/CalibWin/MainWindow.cc
     ${PROJECT_SOURCE_DIR}/CalibWin/CalibWindow.cc
