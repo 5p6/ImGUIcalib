@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.20)
 if(WIN32)
     set(VCPKG_ROOT "F:/app/vcpkg/scripts/buildsystems/vcpkg.cmake")
     set(CMAKE_TOOLCHAIN_FILE ${VCPKG_ROOT})
+    message(STATUS "Using vcpkg toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
 endif()
 
 
@@ -21,8 +22,9 @@ find_package(OpenCV REQUIRED)
 set(MYLIB_TYPE SHARED)
 # 检查操作系统
 if(WIN32)
-    # 对于Windows，设置为静态库
-    set(MYLIB_TYPE STATIC)
+    # 设置动态库编译定义
+    add_definitions(-DDLLEXPORT)
+    message(STATUS "Using dynamic library for Windows")
 endif()
 
 # imgui的源代码

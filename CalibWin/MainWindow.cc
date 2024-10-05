@@ -104,7 +104,7 @@ void MainWindow::ProcessInput()
     cameraPosition = glm::vec3(cameraDistance * cos(cameraYaw) * cos(cameraPitch),
                                cameraDistance * sin(cameraPitch),
                                cameraDistance * sin(cameraYaw) * cos(cameraPitch));
-    cameraPosition = glm::normalize(cameraPosition - cameraTarget) * cameraDistance + cameraTarget;
+    //   = glm::normalize(cameraPosition - cameraTarget) * cameraDistance + cameraTarget;
 }
 
 // 子坐标系的姿态

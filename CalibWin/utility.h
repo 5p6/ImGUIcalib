@@ -6,22 +6,23 @@
 #include "imgui.h"
 #include "ImGuiFileDialog.h"
 #include <iostream>
+#include "BaseWindow.h"
 
 namespace utility
 {
     // 将opencv的mat转换为opengl可接受的数据类型
-    GLuint matToTexture(const cv::Mat &mat);
+    DLLEXPORT GLuint matToTexture(const cv::Mat &mat);
 
     
     // imgui 对文件夹路径选择的支持
-    void SelectFolderButton(
+    DLLEXPORT void SelectFolderButton(
         std::string &filepath,
         const char *button,
         const char *dialogKey,
         const char *title);
 
-    //
-    bool concat(const cv::Mat& left,const cv::Mat& right,cv::Mat& dst);
+    // 拼接两张图片
+    DLLEXPORT bool concat(const cv::Mat& left,const cv::Mat& right,cv::Mat& dst);
 }
 
 #endif
